@@ -23,13 +23,14 @@ namespace publish_queue_bulk
             {
                 var mode = optionMode.HasValue()
                     ? optionMode.Value()
-                    : "listen";
+                    : "consume";
 
                 if(mode.Equals("publish", StringComparison.OrdinalIgnoreCase)) {
-                    Publish.Start(MESSAGES);
+                    Publish.StartAsync(MESSAGES).GetAwaiter().GetResult();
                 }
                 else {
-                    
+                    Consume.Start(1);
+                    Console.ReadLine();
                 }
                 return 0;
             });

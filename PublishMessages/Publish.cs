@@ -8,7 +8,7 @@ namespace publish_queue_bulk
 {
     class Publish
     {
-        public static void Start(int message_size)
+        public static async Task StartAsync(int message_size)
         {
             var connectionString = Environment.GetEnvironmentVariable("QUEUE_CONNECTIONSTRING");
             var queueName = Environment.GetEnvironmentVariable("QUEUE_NAME");
@@ -16,16 +16,13 @@ namespace publish_queue_bulk
             var queueClient = new QueueClient(connectionString, queueName);
             try
             {
-                Parallel.For(0, message_size, x =>
-                {
-                    queueClient.SendAsync(GenerateMessage());
+                await Task.Run(() => Parallel.For(0, message_size, x => {
+                queueClient.SendAsync(GenerateMessage()).GetAwaiter().GetResult();
                     Console.WriteLine($"Sent message {x}");
-                });
+                }));
+
             }
-            finally
-            {
-            }
-            Console.ReadLine();
+            finally {}
         }
 
         private static Message GenerateMessage()
