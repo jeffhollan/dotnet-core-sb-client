@@ -10,8 +10,8 @@ namespace publish_queue_bulk
 {
     class Program
     {
-        private static int MESSAGES = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("PUBLISH_COUNT")) ? Convert.ToInt32(Environment.GetEnvironmentVariable("PUBLISH_COUNT")) : 100;
-        private static int CONCURRENCY = String.IsNullOrEmpty(Environment.GetEnvironmentVariable("CONCURRENT_READ")) ? Convert.ToInt32(Environment.GetEnvironmentVariable("CONCURRENT_READ")) : 5;
+        private static int MESSAGES = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("PUBLISH_COUNT")) ? Convert.ToInt32(Environment.GetEnvironmentVariable("PUBLISH_COUNT")) : 100;
+        private static int CONCURRENCY = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("CONCURRENT_READ")) ? Convert.ToInt32(Environment.GetEnvironmentVariable("CONCURRENT_READ")) : 5;
 
         static int Main(string[] args)
         {
