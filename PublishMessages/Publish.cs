@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Microsoft.Azure.ServiceBus;
@@ -16,11 +17,14 @@ namespace publish_queue_bulk
             var queueClient = new QueueClient(connectionString, queueName);
             try
             {
-                await Task.Run(() => Parallel.For(0, message_size, new ParallelOptions { MaxDegreeOfParallelism = 50 }, x =>
+                List<Task> tasks = new List<Task>();
+                for(int x = 0; x < message_size; x++) 
                 {
-                    queueClient.SendAsync(GenerateMessage()).GetAwaiter().GetResult();
+                    tasks.Add(queueClient.SendAsync(GenerateMessage()));
                     Console.WriteLine($"Sent message {x}");
-                }));
+                }
+
+                await Task.WhenAll(tasks.ToArray());
 
             }
             finally { }
