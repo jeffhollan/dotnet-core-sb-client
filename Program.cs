@@ -11,7 +11,7 @@ namespace publish_queue_bulk
     class Program
     {
         private static int MESSAGES = 100;
-        private static int CONCURRENCY = 10;
+        private static int CONCURRENCY = 5;
 
         static int Main(string[] args)
         {
