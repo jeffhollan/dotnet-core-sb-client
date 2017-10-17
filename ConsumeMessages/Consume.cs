@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Concurrent;
+using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -12,34 +13,38 @@ namespace publish_queue_bulk
     {
         public static void Start(int concurrent_size)
         {
+            var client = new HttpClient();
             var connectionString = Environment.GetEnvironmentVariable("QUEUE_CONNECTIONSTRING");
             var queueName = Environment.GetEnvironmentVariable("QUEUE_NAME");
 
             var queueClient = new QueueClient(connectionString, queueName, ReceiveMode.ReceiveAndDelete);
+
+            client.Timeout = new TimeSpan(1, 0, 0);
             try
             {
-                queueClient.RegisterMessageHandler((m, token) =>
+                queueClient.RegisterMessageHandler(async (m, token) =>
                 {
-                    // Serialize the Service Bus message to a JObject
-                    JObject message = JObject.Parse(Encoding.UTF8.GetString(m.Body));
-                    
-                    Console.WriteLine(message.ToString());
+                    try
+                    {
+                        // Serialize the Service Bus message to a JObject
+                        JObject message = JObject.Parse(Encoding.UTF8.GetString(m.Body));
 
-                    // Reverse the GUID property 1000 times
-                    // for(int y = 0; y < 10000; y++) {
-                    //     Array.Reverse(((string)message["id"]).ToCharArray());
-                    // }
+                        Console.WriteLine(message.ToString() + " -- Downloading...");
+                        await client.GetAsync("http://ipv4.download.thinkbroadband.com/10MB.zip", token);
+                        Console.WriteLine("..Downloaded");
 
-                    Thread.Sleep(2000);
-
-                    return Task.CompletedTask;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.ToString());
+                    }
                 }, new MessageHandlerOptions((exception) =>
                 {
                     Console.WriteLine(exception.Exception.Data);
                     return Task.CompletedTask;
                 })
                 {
-                    AutoComplete = true,
+                    //   AutoComplete = true,
                     MaxConcurrentCalls = concurrent_size
                 });
             }
