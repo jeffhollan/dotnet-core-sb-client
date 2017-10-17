@@ -19,6 +19,7 @@ ENV QUEUE_NAME "messages"
 ENV QUEUE_CONNECTIONSTRING "yourStringHere"
 ENV CONCURRENT_READ 5
 ENV PUBLISH_COUNT 100
+ENV FILE_SIZE 100
 
 ENTRYPOINT ["dotnet", "publish-queue-bulk.dll"]
 CMD ["--mode", "consume"]

@@ -15,13 +15,11 @@ namespace publish_queue_bulk
         public static void Start(int concurrent_size)
         {
             Random rng = new Random();
-            var client = new HttpClient();
             var connectionString = Environment.GetEnvironmentVariable("QUEUE_CONNECTIONSTRING");
             var queueName = Environment.GetEnvironmentVariable("QUEUE_NAME");
+            int fileSize = !String.IsNullOrEmpty(Environment.GetEnvironmentVariable("FILESIZE")) ? Convert.ToInt32(Environment.GetEnvironmentVariable("FILESIZE")) : 100;
 
             var queueClient = new QueueClient(connectionString, queueName, ReceiveMode.ReceiveAndDelete);
-
-            client.Timeout = new TimeSpan(1, 0, 0);
             try
             {
                 queueClient.RegisterMessageHandler((m, token) =>
@@ -31,8 +29,9 @@ namespace publish_queue_bulk
                         // Serialize the Service Bus message to a JObject
                         JObject message = JObject.Parse(Encoding.UTF8.GetString(m.Body));
 
+                        // Generating a large file and loading it into memory to simulate compute
                         Console.WriteLine("Recieved message: " + message["id"]);
-                        byte[] data = new byte[150 * 1024 * 1024];
+                        byte[] data = new byte[fileSize * 1024 * 1024];
                         rng.NextBytes(data);
                         Stream stream = new MemoryStream(data);
                         stream.Dispose();
