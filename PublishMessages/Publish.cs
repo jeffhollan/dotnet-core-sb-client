@@ -16,18 +16,19 @@ namespace publish_queue_bulk
             var queueClient = new QueueClient(connectionString, queueName);
             try
             {
-                await Task.Run(() => Parallel.For(0, message_size, x => {
-                queueClient.SendAsync(GenerateMessage()).GetAwaiter().GetResult();
+                await Task.Run(() => Parallel.For(0, message_size, new ParallelOptions { MaxDegreeOfParallelism = 50 }, x =>
+                {
+                    queueClient.SendAsync(GenerateMessage()).GetAwaiter().GetResult();
                     Console.WriteLine($"Sent message {x}");
                 }));
 
             }
-            finally {}
+            finally { }
         }
 
         private static Message GenerateMessage()
         {
-            return new Message(Encoding.UTF8.GetBytes($"{{id={Guid.NewGuid().ToString()}}}"));
+            return new Message(Encoding.UTF8.GetBytes($"{{\"id\": \"${Guid.NewGuid().ToString()}\"}}"));
         }
 
     }

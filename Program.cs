@@ -10,7 +10,8 @@ namespace publish_queue_bulk
 {
     class Program
     {
-        public static int MESSAGES = 50;
+        private static int MESSAGES = 500;
+        private static int CONCURRENCY = 10;
 
         static int Main(string[] args)
         {
@@ -29,7 +30,7 @@ namespace publish_queue_bulk
                     Publish.StartAsync(MESSAGES).GetAwaiter().GetResult();
                 }
                 else {
-                    Consume.Start(1);
+                    Consume.Start(CONCURRENCY);
                     Console.ReadLine();
                 }
                 return 0;
